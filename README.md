@@ -11,18 +11,26 @@ A Bitbucket command line client written in Python3.
 ### Pipelines
 
 - trigger
-- status
+- list / status
+- browse
 
 ### Pull requests
 
-- add
+- create
 - list
 - review
 
+### Issues
+
+- create
+- list
+- update
+- comment
+
 ## Dependencies
 
-- `requests`
-- `gitpython`
+- `requests` (rather: `atlassian-python-api`)
+- `gitpython` (or: `sh`)
 
 ## Authentication
 
@@ -32,13 +40,24 @@ A Bitbucket command line client written in Python3.
 - enter name and callback URL (e.g. https://google.com)
 - adjust permissions
 - save
-- copy key and secret
+- copy key and secret to environment variables `$BB_CONSUMER_KEY` and `$BB_CONSUMER_SECRET`
 
-### Request access token via command line
+### Request access token via command line (one-off)
 
-- from [4.4](https://developer.atlassian.com/bitbucket/api/2/reference/meta/authentication):
+From [4.4](https://developer.atlassian.com/bitbucket/api/2/reference/meta/authentication):
 
-    curl -X POST KEY:SECRET https://bitbucket.org/site/oauth2/access_token -d grant_type=client_credentials
+    mkdir -p ~/.config/bibu
+    curl -X POST "$BB_CONSUMER_KEY:$BB_CONSUMER_SECRET" https://bitbucket.org/site/oauth2/access_token -d grant_type=client_credentials > ~/.config/bibu/credentials.json
+
+### Refresh access token
+
+From [here](https://developer.atlassian.com/bitbucket/api/2/reference/meta/authentication#refresh-tokens)
+
+> Our access tokens expire in one hour. When this happens you'll get 401 responses.
+
+Hence
+
+    curl -X POST -u "$BB_CONSUMER_KEY:$BB_CONSUMER_SECRET" https://bitbucket.org/site/oauth2/access_token -d grant_type=refresh_token -d refresh_token="$(jq -r .refresh_token ~/.config/bibu/credentials.json)"
 
 ## TODO
 
