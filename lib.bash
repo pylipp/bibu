@@ -63,14 +63,18 @@ bb_issues() {
     repo=$(git remote -v | cut -d: -f2 | cut -d. -f1 | tail -n1)
     echo "Listing open/new issues in $repo..." >&2
 
-    access_token=$(jq -r .access_token $token_filepath)
+    _bb_issue_list "$repo"
+}
 
-    url=https://api.bitbucket.org/2.0/repositories/$repo/issues
-    http_method=GET
+_bb_issue_list() {
+    local rc url repo
+    repo="$1"
+
+    access_token=$(jq -r .access_token $token_filepath)
 
     _fetch() {
         # Execute request for given URL and echo HTTP status
-        curl -X $http_method -s \
+        curl -X GET -sL \
             -w "%{http_code}" \
             -o $response_body \
             -H "Authorization: Bearer {$access_token}" \
@@ -78,6 +82,8 @@ bb_issues() {
     }
 
     rc=0
+    url=https://api.bitbucket.org/2.0/repositories/"$repo"/issues
+
     while true; do
         http_status=$(_fetch "$url")
 
