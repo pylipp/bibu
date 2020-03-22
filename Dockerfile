@@ -29,7 +29,7 @@ RUN package=shellcheck-v0.7.0 && \
   mv $package/shellcheck /usr/local/bin && \
   rm -rf $archive $package
 
-RUN curl -o /usr/local/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
+RUN curl -Lo /usr/local/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
   chmod +x /usr/local/bin/jq
 
 ENV BITBUCKET_REST_API_AUTH key:secret
