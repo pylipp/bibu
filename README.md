@@ -62,3 +62,11 @@ Hence
 ## TODO
 
 [x] check how to authenticate with Bitbucket (also [this](https://community.atlassian.com/t5/Answers-Developer-Questions/Bitbucket-REST-API-POST-using-token-instead-of-basic-auth/qaq-p/474823) or [this](https://developer.atlassian.com/cloud/bitbucket/oauth-2/))
+
+## Contributing
+
+### Testing
+
+Fetch the Docker image
+
+    docker pull pylipp/bibu:latest
