@@ -203,3 +203,27 @@ _bb_refresh_access() {
 
     return $rc
 }
+
+_bb_obtain_access() {
+    echo "Obtaining access token..." >&2
+    local http_status rc
+
+    http_status=$(curl -X POST -s \
+        -w "%{http_code}" \
+        -o $response_body \
+        -u "$BITBUCKET_REST_API_AUTH" \
+        https://bitbucket.org/site/oauth2/access_token \
+        -d grant_type=client_credentials)
+
+    if [ $http_status -lt 300 ]; then
+        # Store tokens
+        mv $response_body $token_filepath
+        rc=0
+    else
+        echo "Error obtaining access ($http_status):" >&2
+        jq -r . $response_body >&2
+        rc=1
+    fi
+
+    return $rc
+}

@@ -40,14 +40,19 @@ A Bitbucket command line client written in Python3.
 - enter name and callback URL (e.g. https://google.com)
 - adjust permissions
 - save
-- copy key and secret to environment variables `$BB_CONSUMER_KEY` and `$BB_CONSUMER_SECRET`
+- copy key and secret to environment variable `$BITBUCKET_REST_API_AUTH`
 
 ### Request access token via command line (one-off)
 
 From [4.4](https://developer.atlassian.com/bitbucket/api/2/reference/meta/authentication):
 
     mkdir -p ~/.config/bibu
-    curl -X POST "$BB_CONSUMER_KEY:$BB_CONSUMER_SECRET" https://bitbucket.org/site/oauth2/access_token -d grant_type=client_credentials > ~/.config/bibu/credentials.json
+    curl -X POST "$BITBUCKET_REST_API_AUTH" https://bitbucket.org/site/oauth2/access_token -d grant_type=client_credentials > ~/.config/bibu/credentials.json
+
+This functionality is provided by the library:
+
+    source lib.bash
+    _bb_obtain_access
 
 ### Refresh access token
 
@@ -57,7 +62,7 @@ From [here](https://developer.atlassian.com/bitbucket/api/2/reference/meta/authe
 
 Hence
 
-    curl -X POST -u "$BB_CONSUMER_KEY:$BB_CONSUMER_SECRET" https://bitbucket.org/site/oauth2/access_token -d grant_type=refresh_token -d refresh_token="$(jq -r .refresh_token ~/.config/bibu/credentials.json)"
+    curl -X POST -u "$BITBUCKET_REST_API_AUTH" https://bitbucket.org/site/oauth2/access_token -d grant_type=refresh_token -d refresh_token="$(jq -r .refresh_token ~/.config/bibu/credentials.json)"
 
 ## TODO
 
@@ -70,3 +75,9 @@ Hence
 Fetch the Docker image
 
     docker pull pylipp/bibu:latest
+
+Create Bitbucket REST API consumer key and secret from your Bitbucket account and save them as environment variable (see section 'Authentication' above).
+
+Execute test suite
+
+    ./run test
