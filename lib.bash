@@ -1,6 +1,22 @@
 response_body=/tmp/bb-response.json
 token_filepath=~/.bb-tokens.json
 
+_http_get() {
+    # Execute HTTP GET request to given URL. The response is written to $response_body
+    # Args: URL
+    # Stdout: HTTP status of response
+
+    access_token=$(jq -r .access_token $token_filepath)
+
+    # Execute request for given URL and echo HTTP status
+    curl -X GET -sL \
+        -w "%{http_code}" \
+        -o $response_body \
+        -H "Authorization: Bearer {$access_token}" \
+        "$1"
+}
+
+
 trigger_bb_pipeline() {
     # Trigger Bitbucket Pipeline via REST API
     # Optionally, pass a pipeline name to run (default: all_tests_and_style)
@@ -70,22 +86,11 @@ _bb_issue_list() {
     local rc url repo
     repo="$1"
 
-    access_token=$(jq -r .access_token $token_filepath)
-
-    _fetch() {
-        # Execute request for given URL and echo HTTP status
-        curl -X GET -sL \
-            -w "%{http_code}" \
-            -o $response_body \
-            -H "Authorization: Bearer {$access_token}" \
-            "$1"
-    }
-
     rc=0
     url=https://api.bitbucket.org/2.0/repositories/"$repo"/issues
 
     while true; do
-        http_status=$(_fetch "$url")
+        http_status=$(_http_get "$url")
 
         if [ $http_status -lt 300 ]; then
             local state title id
