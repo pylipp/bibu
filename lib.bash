@@ -12,6 +12,7 @@ _http_get() {
     curl -X GET -sL \
         -w "%{http_code}" \
         -o $response_body \
+        -H 'Content-Type: application/json' \
         -H "Authorization: Bearer {$access_token}" \
         "$1"
 }
@@ -137,18 +138,9 @@ bb_pipelines() {
 _pipeline_list() {
     local rc url repo http_status
     repo="$1"
-    access_token=$(jq -r .access_token $token_filepath)
 
     url=https://api.bitbucket.org/2.0/repositories/$repo/pipelines/'?sort=-created_on'
-    http_method=GET
-
-    http_status=$(curl -X $http_method -s \
-        -w "%{http_code}" \
-        -o $response_body \
-        -H 'Content-Type: application/json' \
-        -H "Authorization: Bearer {$access_token}" \
-        "$url"
-    )
+    http_status=$(_http_get "$url")
 
     rc=0
     if [ $http_status -lt 300 ]; then
