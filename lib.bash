@@ -2,23 +2,41 @@ response_body=/tmp/bb-response.json
 token_filepath=~/.bb-tokens.json
 
 _http_get() {
-    # Execute HTTP GET request to given URL. The response is written to $response_body.
-    # If a 401 response is returned, refresh access token, and repeat request
+    # Execute HTTP GET request to given URL
     # Args: URL
+    _http_request GET "$@"
+}
+
+_http_post() {
+    # Execute HTTP POST request to given URL. Any additional arguments are
+    # forwarded to _http_request
+    # Args: URL [CURL-OPTIONS]
+    _http_request POST "$@"
+}
+
+_http_request() {
+    # Execute HTTP request of specified method (upper-case name) to given URL.
+    # Any additional arguments are forwarded to curl.
+    # The response is written to $response_body.
+    # If a 401 response is returned, refresh access token, and repeat request.
+    # Args: METHOD URL [CURL-OPTIONS]
     # Return: 0 if response ok
     #         1 if error in response
     #         2 if refreshing access failed
 
-    local rc access_token http_status
+    local method url rc access_token http_status
+    method="$1";  shift
+    url="$1"; shift
+
     access_token=$(jq -r .access_token $token_filepath)
 
-    # Execute request for given URL and echo HTTP status
-    http_status=$(curl -X GET -sL \
+    http_status=$(curl -X "$method" -sL \
         -w "%{http_code}" \
         -o $response_body \
         -H 'Content-Type: application/json' \
         -H "Authorization: Bearer {$access_token}" \
-        "$1"
+        "$@" \
+        "$url"
     )
 
     if [ "$http_status" -lt 300 ]; then
@@ -26,7 +44,7 @@ _http_get() {
 
     elif [ "$http_status" -eq 401 ]; then
         if _bb_refresh_access; then
-            _http_get "$@"
+            _http_request "$method" "$url" "$@"
             rc=$?
         else
             rc=2
@@ -40,27 +58,6 @@ _http_get() {
 
     return $rc
 }
-
-_http_post() {
-    # Execute HTTP POST request to given URL. The response is written to $response_body.
-    # Any additional arguments are forwarded to curl
-    # Args: URL [CURL-OPTIONS]
-    # Stdout: HTTP status of response
-    local url access_token
-    url="$1"
-    shift
-
-    access_token=$(jq -r .access_token $token_filepath)
-
-    curl -X POST -sL \
-        -w "%{http_code}" \
-        -o $response_body \
-        -H 'Content-Type: application/json' \
-        -H "Authorization: Bearer {$access_token}" \
-        "$url" \
-        "$@"
-}
-
 
 trigger_bb_pipeline() {
     # Trigger Bitbucket Pipeline via REST API
@@ -79,7 +76,7 @@ trigger_bb_pipeline() {
 }
 
 _pipeline_run() {
-    local repo branch revision pipeline_name
+    local repo branch revision pipeline_name url data rc
     repo="$1"
     branch="$2"
     revision="$3"
@@ -99,21 +96,12 @@ _pipeline_run() {
       }
     }"
 
-    http_status=$(_http_post "$url" -d "$data")
-    rc=0
-    if [ $http_status -lt 300 ]; then
+    if _http_post "$url" -d "$data"; then
+        rc=0
         printf "Started pipeline " >&2
         jq -r .uuid $response_body >&2
-    elif [ $http_status -eq 401 ]; then
-        if _bb_refresh_access; then
-            _pipeline_run "$@"
-            rc=$?
-        else
-            rc=1
-        fi
+
     else
-        echo "Error ($http_status):" >&2
-        jq -r . $response_body >&2
         rc=1
     fi
 
