@@ -28,3 +28,16 @@ setup() {
     assert_line -n 11 '1 This is the title'
     assert_equal ${#lines[@]} 12
 }
+
+@test "Listing of pipelines" {
+    run _pipeline_list pylipp/test-rest-api-wrapper
+    assert_success
+
+    assert_line -n 0 '6  2020-03-13  10:43  pylipp  master  SUCCESSFUL'
+    assert_line -n 1 '5  2020-03-12  18:35  pylipp  test    STOPPED'
+    assert_line -n 2 '4  2020-03-12  18:30  pylipp  test    SUCCESSFUL'
+    assert_line -n 3 '3  2020-03-12  13:09  pylipp  master  SUCCESSFUL'
+    assert_line -n 4 '2  2020-03-12  13:09  pylipp  master  SUCCESSFUL'
+    assert_line -n 5 '1  2020-03-12  13:06  pylipp  master  SUCCESSFUL'
+    assert_equal ${#lines[@]} 6
+}

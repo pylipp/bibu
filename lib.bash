@@ -131,6 +131,12 @@ bb_pipelines() {
     repo=$(git remote -v | cut -d: -f2 | cut -d. -f1 | tail -n1)
     echo "Listing open/new pipelines in $repo..." >&2
 
+    _pipeline_list "$repo"
+}
+
+_pipeline_list() {
+    local rc url repo http_status
+    repo="$1"
     access_token=$(jq -r .access_token $token_filepath)
 
     url=https://api.bitbucket.org/2.0/repositories/$repo/pipelines/'?sort=-created_on'
