@@ -2,19 +2,43 @@ response_body=/tmp/bb-response.json
 token_filepath=~/.bb-tokens.json
 
 _http_get() {
-    # Execute HTTP GET request to given URL. The response is written to $response_body
+    # Execute HTTP GET request to given URL. The response is written to $response_body.
+    # If a 401 response is returned, refresh access token, and repeat request
     # Args: URL
-    # Stdout: HTTP status of response
+    # Return: 0 if response ok
+    #         1 if error in response
+    #         2 if refreshing access failed
 
+    local rc access_token http_status
     access_token=$(jq -r .access_token $token_filepath)
 
     # Execute request for given URL and echo HTTP status
-    curl -X GET -sL \
+    http_status=$(curl -X GET -sL \
         -w "%{http_code}" \
         -o $response_body \
         -H 'Content-Type: application/json' \
         -H "Authorization: Bearer {$access_token}" \
         "$1"
+    )
+
+    if [ "$http_status" -lt 300 ]; then
+        rc=0
+
+    elif [ "$http_status" -eq 401 ]; then
+        if _bb_refresh_access; then
+            _http_get "$@"
+            rc=$?
+        else
+            rc=2
+        fi
+
+    else
+        echo "Error ($http_status):" >&2
+        jq -r . $response_body >&2
+        rc=1
+    fi
+
+    return $rc
 }
 
 
@@ -91,9 +115,7 @@ _bb_issue_list() {
     url=https://api.bitbucket.org/2.0/repositories/"$repo"/issues
 
     while true; do
-        http_status=$(_http_get "$url")
-
-        if [ $http_status -lt 300 ]; then
+        if _http_get "$url"; then
             local state title id
             while IFS=  read -r; do
                 state=$(echo "$REPLY" | jq -r .state)
@@ -109,17 +131,8 @@ _bb_issue_list() {
             if [[ "$url" = null ]]; then
                 break
             fi
-        elif [ $http_status -eq 401 ]; then
-            if _bb_refresh_access; then
-                bb_issues "$@"
-                rc=$?
-            else
-                rc=1
-                break
-            fi
+
         else
-            echo "Error ($http_status):" >&2
-            jq -r .error.message $response_body >&2
             rc=1
             break
         fi
@@ -136,15 +149,15 @@ bb_pipelines() {
 }
 
 _pipeline_list() {
-    local rc url repo http_status
+    local rc url repo
     repo="$1"
 
     url=https://api.bitbucket.org/2.0/repositories/$repo/pipelines/'?sort=-created_on'
-    http_status=$(_http_get "$url")
 
     rc=0
-    if [ $http_status -lt 300 ]; then
+    if _http_get "$url"; then
         local state
+
         while IFS=  read -r; do
             printf '%d ' "$(echo "$REPLY" | jq -r .build_number)"
             # Convert '2020-03-05T08:56:29.204Z' to '2020-03-05 08:56'
@@ -161,16 +174,8 @@ _pipeline_list() {
             fi
             printf '\n'
         done < <(jq -cr '.values[]' $response_body) | column -t
-    elif [ $http_status -eq 401 ]; then
-        if _bb_refresh_access; then
-            bb_pipelines "$@"
-            rc=$?
-        else
-            rc=1
-        fi
+
     else
-        echo "Error ($http_status):" >&2
-        jq -r . $response_body >&2
         rc=1
     fi
 
