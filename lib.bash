@@ -54,6 +54,17 @@ trigger_bb_pipeline() {
 
     echo "Requesting to run pipeline \"$pipeline_name\" on current branch in $repo..." >&2
 
+    args=("$(git rev-parse --abbrev-ref HEAD)" "$(git rev-parse HEAD)" "$pipeline_name")
+    _pipeline_run "$repo" "${args[@]}"
+}
+
+_pipeline_run() {
+    local repo branch revision pipeline_name
+    repo="$1"
+    branch="$2"
+    revision="$3"
+    pipeline_name="$4"
+
     access_token=$(jq -r .access_token $token_filepath)
 
     url=https://api.bitbucket.org/2.0/repositories/$repo/pipelines/
@@ -62,12 +73,12 @@ trigger_bb_pipeline() {
       \"target\": {
         \"commit\": {
           \"type\": \"commit\",
-          \"hash\": \"$(git rev-parse HEAD)\"
+          \"hash\": \"$revision\"
         },
         \"selector\": { \"type\": \"custom\", \"pattern\": \"$pipeline_name\" },
         \"ref_type\": \"branch\",
         \"type\": \"pipeline_ref_target\",
-        \"ref_name\": \"$(git rev-parse --abbrev-ref HEAD)\"
+        \"ref_name\": \"$branch\"
       }
     }"
 
@@ -86,7 +97,7 @@ trigger_bb_pipeline() {
         jq -r .uuid $response_body >&2
     elif [ $http_status -eq 401 ]; then
         if _bb_refresh_access; then
-            trigger_bb_pipeline "$@"
+            _pipeline_run "$@"
             rc=$?
         else
             rc=1

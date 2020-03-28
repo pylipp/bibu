@@ -41,3 +41,10 @@ setup() {
     assert_line -n 5 '1  2020-03-12  13:06  pylipp  master  SUCCESSFUL'
     assert_equal ${#lines[@]} 6
 }
+
+@test "Running a pipeline" {
+    run _pipeline_run pylipp/test-rest-api-wrapper master d54ee23ee9537d61200e9bb9fc36b02c82619d3c test
+    assert_success
+
+    assert_line -n 0 -p 'Started pipeline {'
+}
