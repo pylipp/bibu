@@ -3,7 +3,7 @@ FROM alpine:latest
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
-RUN apk --update add git bash curl && \
+RUN apk --update add git bash curl util-linux && \
     rm -rf /var/lib/apt/lists/* && \
     rm /var/cache/apk/*
 
