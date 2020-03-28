@@ -41,6 +41,26 @@ _http_get() {
     return $rc
 }
 
+_http_post() {
+    # Execute HTTP POST request to given URL. The response is written to $response_body.
+    # Any additional arguments are forwarded to curl
+    # Args: URL [CURL-OPTIONS]
+    # Stdout: HTTP status of response
+    local url access_token
+    url="$1"
+    shift
+
+    access_token=$(jq -r .access_token $token_filepath)
+
+    curl -X POST -sL \
+        -w "%{http_code}" \
+        -o $response_body \
+        -H 'Content-Type: application/json' \
+        -H "Authorization: Bearer {$access_token}" \
+        "$url" \
+        "$@"
+}
+
 
 trigger_bb_pipeline() {
     # Trigger Bitbucket Pipeline via REST API
@@ -65,10 +85,7 @@ _pipeline_run() {
     revision="$3"
     pipeline_name="$4"
 
-    access_token=$(jq -r .access_token $token_filepath)
-
     url=https://api.bitbucket.org/2.0/repositories/$repo/pipelines/
-    http_method=POST
     data="{
       \"target\": {
         \"commit\": {
@@ -82,15 +99,7 @@ _pipeline_run() {
       }
     }"
 
-    http_status=$(curl -X $http_method -s \
-        -w "%{http_code}" \
-        -o $response_body \
-        -H 'Content-Type: application/json' \
-        -H "Authorization: Bearer {$access_token}" \
-        "$url" \
-        -d "$data"
-    )
-
+    http_status=$(_http_post "$url" -d "$data")
     rc=0
     if [ $http_status -lt 300 ]; then
         printf "Started pipeline " >&2
