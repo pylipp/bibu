@@ -7,7 +7,26 @@ usage() {
     printf "Available commands:\n" >&2
     printf -- "- container\n" >&2
     printf -- "- test\n" >&2
+    printf -- "- release\n" >&2
     exit 1
+}
+
+release() {
+    if ! git diff-index --quiet HEAD --; then
+        printf "Working directory not clean. Aborting release\n" >&2
+        exit 1
+    fi
+
+    set -ev
+
+    rm -rf dist build
+    python setup.py bdist_wheel --universal
+    twine upload dist/*
+
+    local version
+    version=v"$(python setup.py --version)"
+    git push --tags origin master
+    hub release create -m "$version" -e "$version"
 }
 
 main() {
@@ -17,6 +36,9 @@ main() {
             ;;
         container )
             docker run -it --rm -e BITBUCKET_REST_API_AUTH="$BITBUCKET_REST_API_AUTH" -v "$ROOT_DIR":/opt/bibu -w /opt/bibu pylipp/bibu:latest
+            ;;
+        release )
+            release
             ;;
         * )
             usage
