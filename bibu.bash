@@ -270,6 +270,8 @@ usage() {
 Usage: bibu COMMAND
 
 A Bitbucket command line interface written in bash.
+bibu operates on the repository of the current working directory, and derives
+information from 'git-remote'.
 
 Available commands:
     issue           Manage Bitbucket issues
