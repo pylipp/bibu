@@ -283,7 +283,7 @@ usage_pipeline() {
         printf '%s\n' "$line"
     done <<END_OF_HELP_TEXT
 Usage: bibu pipeline list
-       bibu pipeline run
+       bibu pipeline run [-n NAME]
 END_OF_HELP_TEXT
 }
 
@@ -301,7 +301,12 @@ parse_command_line() {
             subcommand="$1"; shift
             case "$subcommand" in
                 list )
-                    function=bb_issue_list ;;
+                    if [ $# -eq 0 ]; then
+                        function=bb_issue_list
+                    else
+                        function=usage_issue
+                    fi
+                    ;;
                 * )
                     function=usage_issue ;;
             esac
@@ -310,10 +315,25 @@ parse_command_line() {
             subcommand="$1"; shift
             case "$subcommand" in
                 list )
-                    function=bb_pipeline_list ;;
+                    if [ $# -eq 0 ]; then
+                        function=bb_pipeline_list
+                    else
+                        function=usage_pipeline
+                    fi
+                    ;;
                 run )
                     function=bb_pipeline_run
-                    args=("$@")
+                    while getopts ":n-:" option; do
+                        case $option in
+                            n )
+                                args+=(name "${!OPTIND}")
+                                ((OPTIND++))
+                                ;;
+                            * )
+                                function=usage_pipeline ;;
+                        esac
+                    done
+                    shift $((OPTIND-1))
                     ;;
                 * )
                     function=usage_pipeline ;;
