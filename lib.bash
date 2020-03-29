@@ -292,7 +292,8 @@ parse_command_line() {
     # Stdout: function corresponding to command line parameters
     # Return: 0 if regular command
     #         1 if usage or invalid command
-    local command subcommand function
+    local command subcommand function args
+    args=()
     command="$1"; shift
 
     case "$command" in
@@ -311,7 +312,9 @@ parse_command_line() {
                 list )
                     function=bb_pipeline_list ;;
                 run )
-                    function=bb_pipeline_run ;;
+                    function=bb_pipeline_run
+                    args=("$@")
+                    ;;
                 * )
                     function=usage_pipeline ;;
             esac
@@ -320,7 +323,7 @@ parse_command_line() {
             function=usage ;;
     esac
 
-    echo $function "$@"
+    echo $function "${args[@]}"
 
     [[ "$function" = "usage"* ]] && return 1 || return 0
 }

@@ -42,8 +42,8 @@ setup() {
 }
 
 @test "Parse pipeline run subcommand" {
-    run parse_command_line pipeline run
+    run parse_command_line pipeline run --name testing
     assert_success
 
-    assert_line -n 0 'bb_pipeline_run'
+    assert_line -n 0 'bb_pipeline_run --name testing'
 }
