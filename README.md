@@ -51,7 +51,7 @@ From [4.4](https://developer.atlassian.com/bitbucket/api/2/reference/meta/authen
 
 This functionality is provided by the library:
 
-    source lib.bash
+    source bibu.bash
     _bb_obtain_access
 
 ### Refresh access token

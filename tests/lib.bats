@@ -2,7 +2,7 @@ load '/usr/local/libexec/bats-support/load.bash'
 load '/usr/local/libexec/bats-assert/load.bash'
 
 setup() {
-    source lib.bash
+    source bibu.bash
 
     # Obtain access only during initial setup
     if [ ! -f "$token_filepath" ]; then

@@ -14,7 +14,8 @@ setup(
     author_email='beth.aleph@yahoo.de',
     license='GPLv3',
     data_files=[
-        ("bin", ["lib.bash"]),
+        ("bin", ["bibu"]),
+        ("lib", ["bibu.bash"]),
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
