@@ -59,6 +59,11 @@ _http_request() {
     return $rc
 }
 
+_repo_name() {
+    # Extract information about remote 'user/repository' from current repository
+    git remote -v | grep -m1 '^origin' | awk '{ print $2; }' | awk -F '/' '{OFS="/"; print $(NF-1),$NF; }' | sed 's/.git$//'
+}
+
 bb_pipeline_run() {
     # Start a pipeline run
     # Args: -n NAME         pipeline name
@@ -76,9 +81,7 @@ bb_pipeline_run() {
         esac
     done
 
-    # Extract information about 'user/repository'
-    repo="$(git remote -v | grep -m1 '^origin' | awk '{ print $2; }' | awk -F '/' '{OFS="/"; print $(NF-1),$NF; }' | sed 's/.git$//')"
-
+    repo="$(_repo_name)"
     echo "Requesting to run pipeline \"$pipeline_name\" on current branch in $repo..." >&2
 
     args=("$(git rev-parse --abbrev-ref HEAD)" "$(git rev-parse HEAD)" "$pipeline_name")
@@ -119,7 +122,7 @@ _pipeline_run() {
 }
 
 bb_issue_list() {
-    repo=$(git remote -v | cut -d: -f2 | cut -d. -f1 | tail -n1)
+    repo="$(_repo_name)"
     echo "Listing open/new issues in $repo..." >&2
 
     _issue_list "$repo"
@@ -160,7 +163,7 @@ _issue_list() {
 }
 
 bb_pipeline_list() {
-    repo=$(git remote -v | cut -d: -f2 | cut -d. -f1 | tail -n1)
+    repo="$(_repo_name)"
     echo "Listing open/new pipelines in $repo..." >&2
 
     _pipeline_list "$repo"
@@ -203,7 +206,7 @@ _pipeline_list() {
 inspect_bb_pipeline() {
     [[ $# -ne 1 ]] && { echo "Pipeline ID missing" >&2; return 1; }
 
-    repo=$(git remote -v | cut -d: -f2 | cut -d. -f1 | tail -n1)
+    repo="$(_repo_name)"
     url="https://bitbucket.org/$repo/addon/pipelines/home#!/results/$1"
 
     echo "Opening $url..."
