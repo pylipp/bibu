@@ -7,8 +7,14 @@ usage() {
     printf "Available commands:\n" >&2
     printf -- "- container\n" >&2
     printf -- "- test\n" >&2
+    printf -- "- install\n" >&2
     printf -- "- release\n" >&2
     exit 1
+}
+
+build_wheel() {
+    rm -rf dist build
+    python setup.py bdist_wheel --universal
 }
 
 release() {
@@ -19,8 +25,7 @@ release() {
 
     set -ev
 
-    rm -rf dist build
-    python setup.py bdist_wheel --universal
+    build_wheel
     twine upload dist/*
 
     local version
@@ -39,6 +44,10 @@ main() {
             ;;
         release )
             release
+            ;;
+        install )
+            build_wheel
+            pip install -U ./dist/*
             ;;
         * )
             usage
