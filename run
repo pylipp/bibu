@@ -32,7 +32,7 @@ release() {
 main() {
     case "$1" in
         test )
-            docker run -it --rm -e BITBUCKET_REST_API_AUTH="$BITBUCKET_REST_API_AUTH" -v "$ROOT_DIR":/opt/bibu -w /opt/bibu pylipp/bibu:latest bats -r tests
+            docker run -it --rm -e BITBUCKET_REST_API_AUTH="$BITBUCKET_REST_API_AUTH" -v "$ROOT_DIR":/opt/bibu -w /opt/bibu pylipp/bibu:latest bats -r "${2:-tests}"
             ;;
         container )
             docker run -it --rm -e BITBUCKET_REST_API_AUTH="$BITBUCKET_REST_API_AUTH" -v "$ROOT_DIR":/opt/bibu -w /opt/bibu pylipp/bibu:latest
