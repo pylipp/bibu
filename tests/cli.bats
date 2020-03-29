@@ -24,7 +24,7 @@ setup() {
     assert_failure
 
     assert_line -n 0 'Usage: bibu pipeline list'
-    assert_line -n 1 '       bibu pipeline run'
+    assert_line -n 1 '       bibu pipeline run [-n NAME]'
 }
 
 @test "Parse issue list subcommand" {
@@ -52,5 +52,5 @@ setup() {
     run parse_command_line pipeline run -n testing
     assert_success
 
-    assert_line -n 0 'bb_pipeline_run name testing'
+    assert_line -n 0 'bb_pipeline_run -n testing'
 }

@@ -60,14 +60,24 @@ _http_request() {
 }
 
 bb_pipeline_run() {
-    # Trigger Bitbucket Pipeline via REST API
-    # Optionally, pass a pipeline name to run (default: all_tests_and_style)
-    # More info:
-    # https://community.atlassian.com/t5/Bitbucket-Pipelines-questions/How-to-trigger-pipeline-through-API-based-on-a-tag/qaq-p/875182
-    # https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories/%7Bworkspace%7D/%7Brepo_slug%7D/pipelines/#post
-    repo=$(git remote -v | cut -d: -f2 | cut -d. -f1 | tail -n1)
+    # Start a pipeline run
+    # Args: -n NAME         pipeline name
 
-    pipeline_name=${1:-'01_all_tests_and_style'}
+    local repo pipeline_name
+    while getopts ":n:" option; do
+        case $option in
+            n )
+                pipeline_name="${OPTARG}"
+                ;;
+            * )
+                printf "Unknown option %s\n" "$option" >&2
+                return 1
+                ;;
+        esac
+    done
+
+    # Extract information about 'user/repository'
+    repo="$(git remote -v | grep -m1 '^origin' | awk '{ print $2; }' | awk -F '/' '{OFS="/"; print $(NF-1),$NF; }' | sed 's/.git$//')"
 
     echo "Requesting to run pipeline \"$pipeline_name\" on current branch in $repo..." >&2
 
@@ -326,7 +336,7 @@ parse_command_line() {
                     while getopts ":n-:" option; do
                         case $option in
                             n )
-                                args+=(name "${!OPTIND}")
+                                args+=(-n "${!OPTIND}")
                                 ((OPTIND++))
                                 ;;
                             * )
