@@ -31,19 +31,19 @@ setup() {
     run parse_command_line issue list
     assert_success
 
-    assert_line -n 0 'bb_issues'
+    assert_line -n 0 'bb_issue_list'
 }
 
 @test "Parse pipeline list subcommand" {
     run parse_command_line pipeline list
     assert_success
 
-    assert_line -n 0 'bb_pipelines'
+    assert_line -n 0 'bb_pipeline_list'
 }
 
 @test "Parse pipeline run subcommand" {
     run parse_command_line pipeline run
     assert_success
 
-    assert_line -n 0 'trigger_bb_pipeline'
+    assert_line -n 0 'bb_pipeline_run'
 }

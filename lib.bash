@@ -59,7 +59,7 @@ _http_request() {
     return $rc
 }
 
-trigger_bb_pipeline() {
+bb_pipeline_run() {
     # Trigger Bitbucket Pipeline via REST API
     # Optionally, pass a pipeline name to run (default: all_tests_and_style)
     # More info:
@@ -108,14 +108,14 @@ _pipeline_run() {
     return $rc
 }
 
-bb_issues() {
+bb_issue_list() {
     repo=$(git remote -v | cut -d: -f2 | cut -d. -f1 | tail -n1)
     echo "Listing open/new issues in $repo..." >&2
 
-    _bb_issue_list "$repo"
+    _issue_list "$repo"
 }
 
-_bb_issue_list() {
+_issue_list() {
     local rc url repo
     repo="$1"
 
@@ -149,7 +149,7 @@ _bb_issue_list() {
     return $rc
 }
 
-bb_pipelines() {
+bb_pipeline_list() {
     repo=$(git remote -v | cut -d: -f2 | cut -d. -f1 | tail -n1)
     echo "Listing open/new pipelines in $repo..." >&2
 
@@ -300,7 +300,7 @@ parse_command_line() {
             subcommand="$1"; shift
             case "$subcommand" in
                 list )
-                    function=bb_issues ;;
+                    function=bb_issue_list ;;
                 * )
                     function=usage_issue ;;
             esac
@@ -309,9 +309,9 @@ parse_command_line() {
             subcommand="$1"; shift
             case "$subcommand" in
                 list )
-                    function=bb_pipelines ;;
+                    function=bb_pipeline_list ;;
                 run )
-                    function=trigger_bb_pipeline ;;
+                    function=bb_pipeline_run ;;
                 * )
                     function=usage_pipeline ;;
             esac
