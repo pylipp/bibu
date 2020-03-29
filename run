@@ -18,9 +18,25 @@ build_wheel() {
 }
 
 release() {
+    local ready version
+    version=v"$(python setup.py --version)"
+    ready=false
+
+    printf "Releasing %s...\n" "$version" >&2
+
     if ! git diff-index --quiet HEAD --; then
-        printf "Working directory not clean. Aborting release\n" >&2
-        exit 1
+        printf "Working directory not clean." >&2
+    elif [ -z "$VIRTUAL_ENV" ]; then
+        printf "No virtualenv activated." >&2
+    elif [ "$(git rev-parse HEAD)" != "$(git rev-parse "$version")" ]; then
+        printf "Current HEAD not tagged." >&2
+    else
+        ready=true
+    fi
+
+    if ! $ready; then
+        printf " Aborting release\n" >&2
+        return 1
     fi
 
     set -ev
@@ -28,8 +44,6 @@ release() {
     build_wheel
     twine upload dist/*
 
-    local version
-    version=v"$(python setup.py --version)"
     git push --tags origin master
     hub release create -m "$version" -e "$version"
 }
