@@ -249,3 +249,88 @@ _bb_obtain_access() {
 
     return $rc
 }
+
+usage() {
+    while IFS= read -r line; do
+        printf '%s\n' "$line"
+    done <<END_OF_HELP_TEXT
+Usage: bibu COMMAND
+
+A Bitbucket command line interface written in bash.
+
+Available commands:
+    issue           Manage Bitbucket issues
+    pipeline        Manage Bitbucket pipelines
+
+General options:
+    --help          Display help message
+
+Environment variables:
+    BITBUCKET_REST_API_AUTH     Consumer OAuth of form key:secret
+END_OF_HELP_TEXT
+}
+
+usage_issue() {
+    while IFS= read -r line; do
+        printf '%s\n' "$line"
+    done <<END_OF_HELP_TEXT
+Usage: bibu issue list
+END_OF_HELP_TEXT
+}
+
+usage_pipeline() {
+    while IFS= read -r line; do
+        printf '%s\n' "$line"
+    done <<END_OF_HELP_TEXT
+Usage: bibu pipeline list
+       bibu pipeline run
+END_OF_HELP_TEXT
+}
+
+parse_command_line() {
+    # Args:   [COMMAND [SUBCOMMAND [OPTIONS]]]
+    # Stdout: function corresponding to command line parameters
+    # Return: 0 if regular command
+    #         1 if usage or invalid command
+    local command subcommand function
+    command="$1"; shift
+
+    case "$command" in
+        issue )
+            subcommand="$1"; shift
+            case "$subcommand" in
+                list )
+                    function=bb_issues ;;
+                * )
+                    function=usage_issue ;;
+            esac
+            ;;
+        pipeline )
+            subcommand="$1"; shift
+            case "$subcommand" in
+                list )
+                    function=bb_pipelines ;;
+                run )
+                    function=trigger_bb_pipeline ;;
+                * )
+                    function=usage_pipeline ;;
+            esac
+            ;;
+        * )
+            function=usage ;;
+    esac
+
+    echo $function "$@"
+
+    [[ "$function" = "usage"* ]] && return 1 || return 0
+}
+
+main() {
+    # Parse command line and run according functionality
+    local function rc
+    function="$(parse_command_line "$@")"
+    rc=$?
+
+    $function
+    return $rc
+}
