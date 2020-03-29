@@ -164,7 +164,7 @@ _issue_list() {
 
 bb_pipeline_list() {
     repo="$(_repo_name)"
-    echo "Listing open/new pipelines in $repo..." >&2
+    echo "Listing pipelines in $repo..." >&2
 
     _pipeline_list "$repo"
 }
