@@ -61,7 +61,7 @@ _http_request() {
 
 _repo_name() {
     # Extract information about remote 'user/repository' from current repository
-    git remote -v | grep -m1 '^origin' | awk '{ print $2; }' | awk -F '/' '{OFS="/"; print $(NF-1),$NF; }' | sed 's/.git$//'
+    git remote -v | grep -m1 '^origin' | awk '{ print $2; }' | awk -F '[:/]' '{OFS="/"; print $(NF-1),$NF; }' | sed 's/.git$//'
 }
 
 bb_pipeline_run() {
