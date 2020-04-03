@@ -1,4 +1,5 @@
 # `bibu`
+[![Build Status](https://travis-ci.org/pylipp/bibu.svg?branch=master)](https://travis-ci.org/pylipp/bibu)
 
 A Bitbucket command line client written in bash.
 
