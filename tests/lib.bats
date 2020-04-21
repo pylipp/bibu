@@ -30,6 +30,7 @@ setup() {
 }
 
 @test "Listing of pipelines" {
+    skip
     run _pipeline_list pylipp/test-rest-api-wrapper
     assert_success
 
