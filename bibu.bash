@@ -64,6 +64,10 @@ _repo_name() {
     git remote -v | grep -m1 '^origin' | awk '{ print $2; }' | awk -F '[:/]' '{OFS="/"; print $(NF-1),$NF; }' | sed 's/.git$//'
 }
 
+_branch_name() {
+    git rev-parse --abbrev-ref HEAD
+}
+
 bb_pipeline_run() {
     # Start a pipeline run
     # Args: -n NAME         pipeline name
@@ -84,7 +88,7 @@ bb_pipeline_run() {
     repo="$(_repo_name)"
     echo "Requesting to run pipeline \"$pipeline_name\" on current branch in $repo..." >&2
 
-    args=("$(git rev-parse --abbrev-ref HEAD)" "$(git rev-parse HEAD)" "$pipeline_name")
+    args=("$(_branch_name)" "$(git rev-parse HEAD)" "$pipeline_name")
     _pipeline_run "$repo" "${args[@]}"
 }
 
