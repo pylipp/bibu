@@ -51,8 +51,13 @@ _http_request() {
         fi
 
     else
-        echo "Error ($http_status):" >&2
-        jq -r . $response_body >&2
+        printf "Error (%s): " "$http_status" >&2
+        # Display error message if response is valid JSON; otherwise show entire response
+        if jq -r .error.message $response_body >/dev/null 2>&1; then
+            jq -r .error.message $response_body >&2
+        else
+            cat $response_body >&2
+        fi
         rc=1
     fi
 
