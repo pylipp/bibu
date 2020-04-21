@@ -125,15 +125,17 @@ bb_issue_list() {
     repo="$(_repo_name)"
     echo "Listing open/new issues in $repo..." >&2
 
-    _issue_list "$repo"
+    _list_all "$repo" issues
 }
 
-_issue_list() {
-    local rc url repo
+_list_all() {
+    # Return all pages from the specified resource
+    local rc url repo resource
     repo="$1"
+    resource="$2"
 
     rc=0
-    url=https://api.bitbucket.org/2.0/repositories/"$repo"/issues
+    url=https://api.bitbucket.org/2.0/repositories/"$repo"/"$resource"
 
     while true; do
         if _http_get "$url"; then

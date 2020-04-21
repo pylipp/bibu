@@ -11,7 +11,7 @@ setup() {
 }
 
 @test "Listing of issues" {
-    run _issue_list pylipp/test-rest-api-wrapper
+    run _list_all pylipp/test-rest-api-wrapper issues
     assert_success
 
     assert_line -n 0 '12 Test issue 10'
