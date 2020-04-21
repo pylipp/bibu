@@ -175,6 +175,61 @@ bb_pr_list() {
     _list_all "$repo" pullrequests
 }
 
+bb_pr_create() {
+    # Create a pullrequest
+    # Args: -t TITLE        pullrequest title
+
+    local repo title branch
+    while getopts ":t:" option; do
+        case $option in
+            t )
+                title="${OPTARG}"
+                ;;
+            * )
+                printf "Unknown option %s\n" "$option" >&2
+                return 1
+                ;;
+        esac
+    done
+
+    repo="$(_repo_name)"
+    branch="$(_branch_name)"
+    echo "Creating new pr from $branch into master in $repo..." >&2
+
+    ${EDITOR:-vim} /tmp/bibu-pr.md
+    _pr_create "$repo" "$branch" "$title" /tmp/bibu-pr.md
+}
+
+_pr_create() {
+    local repo branch title description_file url data rc
+    repo="$1"
+    branch="$2"
+    title="$3"
+    description_file="$4"
+
+    url=https://api.bitbucket.org/2.0/repositories/$repo/pullrequests
+    data="{
+      \"title\": \"$title\",
+      \"description\": \"$(cat "$description_file")\",
+      \"source\": {
+        \"branch\": {
+          \"name\": \"$branch\"
+        }
+      }
+    }"
+
+    if _http_post "$url" -d "$data"; then
+        rc=0
+        printf "Created pr #" >&2
+        jq -r .id $response_body >&2
+
+    else
+        rc=1
+    fi
+
+    return $rc
+}
+
 bb_pipeline_list() {
     repo="$(_repo_name)"
     echo "Listing pipelines in $repo..." >&2
@@ -312,6 +367,7 @@ usage_pr() {
         printf '%s\n' "$line"
     done <<END_OF_HELP_TEXT
 Usage: bibu pr list
+       bibu pr create -t TITLE
 END_OF_HELP_TEXT
 }
 
@@ -357,6 +413,20 @@ parse_command_line() {
                     else
                         function=usage_pr
                     fi
+                    ;;
+                create )
+                    function=bb_pr_create
+                    while getopts ":t-:" option; do
+                        case $option in
+                            t )
+                                args+=(-t "${!OPTIND}")
+                                ((OPTIND++))
+                                ;;
+                            * )
+                                function=usage_pr ;;
+                        esac
+                    done
+                    shift $((OPTIND-1))
                     ;;
                 * )
                     function=usage_pr ;;

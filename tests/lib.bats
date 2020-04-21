@@ -53,5 +53,13 @@ setup() {
     run _list_all pylipp/test-rest-api-wrapper pullrequests
     assert_success
 
-    assert_equal ${#lines[@]} 0
+    assert_line -n 0 '1 title'
+    assert_equal ${#lines[@]} 1
+}
+
+@test "Creating a pr" {
+    run _pr_create pylipp/test-rest-api-wrapper test title <(echo "I'm the description")
+    assert_success
+
+    assert_line -n 0 -p 'Created pr #1'
 }

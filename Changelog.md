@@ -3,6 +3,7 @@
 ## unreleased
 ### Added
 - Command for listing open pullrequests of repo
+- Command for creating pullrequest into repo main branch
 ### Changed
 ### Removed
 ### Fixed
