@@ -143,7 +143,7 @@ _list_all() {
             while IFS=  read -r; do
                 state=$(echo "$REPLY" | jq -r .state)
 
-                if [[ $state = new ]] || [[ $state = open ]]; then
+                if [[ $state = new ]] || [[ ${state,,} = open ]]; then
                     title=$(echo "$REPLY" | jq -r .title)
                     id=$(echo "$REPLY" | jq -r .id)
                     printf '%s %s\n' "$id" "$title"
@@ -162,6 +162,13 @@ _list_all() {
     done | sort -n -r
 
     return $rc
+}
+
+bb_pr_list() {
+    repo="$(_repo_name)"
+    echo "Listing open/new prs in $repo..." >&2
+
+    _list_all "$repo" pullrequests
 }
 
 bb_pipeline_list() {
@@ -278,6 +285,7 @@ information from 'git-remote'.
 Available commands:
     issue           Manage Bitbucket issues
     pipeline        Manage Bitbucket pipelines
+    pr              Manage Bitbucket pullrequests
 
 General options:
     --help          Display help message
@@ -292,6 +300,14 @@ usage_issue() {
         printf '%s\n' "$line"
     done <<END_OF_HELP_TEXT
 Usage: bibu issue list
+END_OF_HELP_TEXT
+}
+
+usage_pr() {
+    while IFS= read -r line; do
+        printf '%s\n' "$line"
+    done <<END_OF_HELP_TEXT
+Usage: bibu pr list
 END_OF_HELP_TEXT
 }
 
@@ -326,6 +342,20 @@ parse_command_line() {
                     ;;
                 * )
                     function=usage_issue ;;
+            esac
+            ;;
+        pr )
+            subcommand="$1"; shift
+            case "$subcommand" in
+                list )
+                    if [ $# -eq 0 ]; then
+                        function=bb_pr_list
+                    else
+                        function=usage_pr
+                    fi
+                    ;;
+                * )
+                    function=usage_pr ;;
             esac
             ;;
         pipeline )

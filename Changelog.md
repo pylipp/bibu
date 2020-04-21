@@ -2,6 +2,7 @@
 
 ## unreleased
 ### Added
+- Command for listing open pullrequests of repo
 ### Changed
 ### Removed
 ### Fixed

@@ -19,6 +19,13 @@ setup() {
     assert_line -n 0 'Usage: bibu issue list'
 }
 
+@test "Show pr usage" {
+    run main pr
+    assert_failure
+
+    assert_line -n 0 'Usage: bibu pr list'
+}
+
 @test "Show pipeline usage" {
     run main pipeline
     assert_failure
@@ -32,6 +39,13 @@ setup() {
     assert_success
 
     assert_line -n 0 'bb_issue_list'
+}
+
+@test "Parse pr list subcommand" {
+    run parse_command_line pr list
+    assert_success
+
+    assert_line -n 0 'bb_pr_list'
 }
 
 @test "Parse issue list subcommand help option" {

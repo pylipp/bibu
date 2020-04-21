@@ -39,6 +39,7 @@ Consult `bibu --help`
     Available commands:
         issue           Manage Bitbucket issues
         pipeline        Manage Bitbucket pipelines
+        pr              Manage Bitbucket pullrequests
 
     General options:
         --help          Display help message

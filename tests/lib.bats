@@ -48,3 +48,10 @@ setup() {
 
     assert_line -n 0 -p 'Started pipeline {'
 }
+
+@test "Listing of prs" {
+    run _list_all pylipp/test-rest-api-wrapper pullrequests
+    assert_success
+
+    assert_equal ${#lines[@]} 0
+}
