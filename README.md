@@ -40,6 +40,7 @@ Consult `bibu --help`
         issue           Manage Bitbucket issues
         pipeline        Manage Bitbucket pipelines
         pr              Manage Bitbucket pullrequests
+        api             Get resource via REST API
 
     General options:
         --help          Display help message

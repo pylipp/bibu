@@ -35,6 +35,13 @@ setup() {
     assert_line -n 1 '       bibu pipeline run [-n NAME]'
 }
 
+@test "Show api usage" {
+    run main api
+    assert_failure
+
+    assert_line -n 0 'Usage: bibu api RESOURCE'
+}
+
 @test "Parse issue list subcommand" {
     run parse_command_line issue list
     assert_success
@@ -82,4 +89,11 @@ setup() {
     assert_success
 
     assert_line -n 0 'bb_pipeline_run -n testing'
+}
+
+@test "Parse api command" {
+    run parse_command_line api pullrequests/1
+    assert_success
+
+    assert_line -n 0 'bb_api pullrequests/1'
 }

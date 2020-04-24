@@ -4,6 +4,7 @@
 ### Added
 - Command for listing open pullrequests of repo
 - Command for creating pullrequest into repo main branch
+- Command for getting arbitrary resource via REST API
 ### Changed
 ### Removed
 ### Fixed

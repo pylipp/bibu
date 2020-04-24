@@ -291,6 +291,29 @@ inspect_bb_pipeline() {
     xdg-open "$url"
 }
 
+bb_api() {
+    # Run GET request of given REST API resource
+    # Args: RESOURCE        resource string
+
+    local resource url rc response
+    resource="$1"
+    url=https://api.bitbucket.org/2.0/repositories/"$(_repo_name)"/"$resource"
+
+    rc=0
+    if _http_get "$url"; then
+        # Attempt to format as JSON
+        if response=$(jq -r . "$response_body" 2>&1); then
+            printf "%s\n" "$response"
+        else
+            cat "$response_body"
+        fi
+    else
+        rc=1
+    fi
+
+    return $rc
+}
+
 _bb_refresh_access() {
     echo "Refreshing access token..." >&2
 
@@ -355,6 +378,7 @@ Available commands:
     issue           Manage Bitbucket issues
     pipeline        Manage Bitbucket pipelines
     pr              Manage Bitbucket pullrequests
+    api             Get resource via REST API
 
 General options:
     --help          Display help message
@@ -390,6 +414,14 @@ Usage: bibu pipeline list
 END_OF_HELP_TEXT
 }
 
+usage_api() {
+    while IFS= read -r line; do
+        printf '%s\n' "$line"
+    done <<END_OF_HELP_TEXT
+Usage: bibu api RESOURCE
+END_OF_HELP_TEXT
+}
+
 parse_command_line() {
     # Args:   [COMMAND [SUBCOMMAND [OPTIONS]]]
     # Stdout: function corresponding to command line parameters
@@ -412,6 +444,16 @@ parse_command_line() {
                     ;;
                 * )
                     function=usage_issue ;;
+            esac
+            ;;
+        api )
+            case "$1" in
+                -h|--help|"" )
+                    function=usage_api ;;
+                * )
+                    args+=("$1")
+                    function=bb_api
+                    ;;
             esac
             ;;
         pr )
