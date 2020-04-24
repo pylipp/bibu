@@ -213,9 +213,10 @@ _pr_create() {
     description_file="$4"
 
     url=https://api.bitbucket.org/2.0/repositories/$repo/pullrequests
+    # Make newlines literal; escape double quotes
     data="{
       \"title\": \"$title\",
-      \"description\": \"$(cat "$description_file")\",
+      \"description\": \"$(sed '$!s/$/\\r\\n\\r\\n/' "$description_file" | tr -d '\n' | sed 's/"/\\"/g')\",
       \"source\": {
         \"branch\": {
           \"name\": \"$branch\"

@@ -59,7 +59,7 @@ setup() {
 }
 
 @test "Creating a pr" {
-    run _pr_create pylipp/test-rest-api-wrapper test title <(echo "I'm the description")
+    run _pr_create pylipp/test-rest-api-wrapper test title <(printf 'I am\nthe "quoted" description')
     assert_success
 
     assert_line -n 0 -p 'Created pr #1'
