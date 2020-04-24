@@ -24,7 +24,7 @@ setup() {
     assert_failure
 
     assert_line -n 0 'Usage: bibu pr list'
-    assert_line -n 1 '       bibu pr create -t TITLE'
+    assert_line -n 1 '       bibu pr create [-t TITLE]'
 }
 
 @test "Show pipeline usage" {
@@ -49,7 +49,14 @@ setup() {
     assert_line -n 0 'bb_pr_list'
 }
 
-@test "Parse pr create subcommand" {
+@test "Parse pr create subcommand without options" {
+    run parse_command_line pr create
+    assert_success
+
+    assert_line -n 0 "bb_pr_create"
+}
+
+@test "Parse pr create subcommand including title" {
     run parse_command_line pr create -t title
     assert_success
 

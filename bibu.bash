@@ -182,7 +182,7 @@ bb_pr_list() {
 
 bb_pr_create() {
     # Create a pullrequest
-    # Args: -t TITLE        pullrequest title
+    # Args: [-t TITLE]      pullrequest title (prompted for if not given)
 
     local repo title branch
     while getopts ":t:" option; do
@@ -200,6 +200,10 @@ bb_pr_create() {
     repo="$(_repo_name)"
     branch="$(_branch_name)"
     echo "Creating new pr from $branch into master in $repo..." >&2
+
+    while [ -z "$title" ]; do
+        read -r -p "Enter pr title: " title
+    done
 
     ${EDITOR:-vim} /tmp/bibu-pr.md
     _pr_create "$repo" "$branch" "$title" /tmp/bibu-pr.md
@@ -373,7 +377,7 @@ usage_pr() {
         printf '%s\n' "$line"
     done <<END_OF_HELP_TEXT
 Usage: bibu pr list
-       bibu pr create -t TITLE
+       bibu pr create [-t TITLE]
 END_OF_HELP_TEXT
 }
 
