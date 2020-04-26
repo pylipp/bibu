@@ -45,6 +45,20 @@ Consult `bibu --help`
     General options:
         --help          Display help message
 
+## Examples
+
+Start a pipeline called `all-tests` on current HEAD:
+
+    bibu pipeline run -n all-tests
+
+View most recent pipeline runs:
+
+    bibu pipeline list
+
+Create a pull-request. You will be prompted for title and description (using `$EDITOR`).
+
+    bibu pr create
+
 ## Ideas
 
 Future features... Feel free to contribute!
