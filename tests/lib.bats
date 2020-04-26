@@ -4,10 +4,8 @@ load '/usr/local/libexec/bats-assert/load.bash'
 setup() {
     source bibu.bash
 
-    # Obtain access only during initial setup
-    if [ ! -f "$token_filepath" ]; then
-        _bb_obtain_access
-    fi
+    # Obtain access; only effective during initial setup (avoid output breaking first test)
+    _bb_obtain_access >/dev/null 2>&1
 }
 
 @test "Listing of issues" {

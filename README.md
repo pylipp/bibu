@@ -21,7 +21,7 @@ Obtain OAuth consumer key and secret from your Bitbucket profile settings:
 - enter name and callback URL (e.g. https://google.com)
 - adjust permissions (`team pipeline:variable webhook pullrequest:write snippet:write wiki repository:admin project issue:write account`)
 - save
-- copy key and secret to environment variable `$BITBUCKET_REST_API_AUTH`
+- copy key and secret to environment variable `$BITBUCKET_REST_API_AUTH` (separated by colon)
 
 ### Dependencies
 

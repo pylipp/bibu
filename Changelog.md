@@ -5,6 +5,7 @@
 - Command for listing open pullrequests of repo
 - Command for creating pullrequest into repo main branch
 - Command for getting arbitrary resource via REST API
+- Checks for verifying proper environment
 ### Changed
 ### Removed
 ### Fixed

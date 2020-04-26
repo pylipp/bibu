@@ -341,6 +341,12 @@ _bb_refresh_access() {
 }
 
 _bb_obtain_access() {
+    # Obtain OAuth2 access token (only effective when not downloaded yet, i.e.
+    # at first invocation of the command line interface)
+    if [ -f "$token_filepath" ]; then
+        return
+    fi
+
     echo "Obtaining access token..." >&2
     local http_status rc
 
@@ -522,10 +528,32 @@ parse_command_line() {
 }
 
 main() {
+    # Check dependencies
+    local deps_ready
+    deps_ready=true
+    for dep in jq curl; do
+        if ! command -v $dep >/dev/null 2>&1; then
+            printf "Can't find dependency: %s\n" $dep
+            deps_ready=false
+        fi
+    done
+    $deps_ready || return 1
+
+    # Check for environment variable
+    if [ -z "$BITBUCKET_REST_API_AUTH" ]; then
+        printf "Obtain OAuth consumer key and secret from your Bitbucket profile\n" >&2
+        printf "settings, and store them in %s.\n" "\$BITBUCKET_REST_API_AUTH" >&2
+        return 1
+    fi
+
     # Parse command line and run according functionality
     local function rc
     function="$(parse_command_line "$@")"
     rc=$?
+
+    if [[ "$function" != "usage"* ]]; then
+        _bb_obtain_access
+    fi
 
     $function
     return $rc
