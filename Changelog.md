@@ -2,13 +2,16 @@
 
 ## unreleased
 ### Added
+### Changed
+### Removed
+### Fixed
+
+## [v0.2.0] - 2020-04-26
+### Added
 - Command for listing open pullrequests of repo
 - Command for creating pullrequest into repo main branch
 - Command for getting arbitrary resource via REST API
 - Checks for verifying proper environment
-### Changed
-### Removed
-### Fixed
 
 ## [v0.1.1] - 2020-04-03
 ### Fixed
