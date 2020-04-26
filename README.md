@@ -47,17 +47,25 @@ Consult `bibu --help`
 
 ## Examples
 
-Start a pipeline called `all-tests` on current HEAD:
+Start a pipeline called `all-tests` on current HEAD
 
     bibu pipeline run -n all-tests
 
-View most recent pipeline runs:
+View most recent pipeline runs
 
     bibu pipeline list
 
 Create a pull-request. You will be prompted for title and description (using `$EDITOR`).
 
     bibu pr create
+
+Get the patch of the pull-request #42
+
+    bibu api pullrequests/42/patch
+
+Get comments on issue #7
+
+    bibu api issues/7/comments | jq '.values[] | .content.raw'
 
 ## Ideas
 
